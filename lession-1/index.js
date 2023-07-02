@@ -140,6 +140,49 @@ app.get("/TodoList/update", (req, res) => {
     data: todoList,
   });
 });
+///xóa trùng
+app.get("/TodoList/removeduplicate", (req, res) => {
+    const uniqueTodoList = [];
+  
+    todoList.forEach((item) => {
+      const index = uniqueTodoList.findIndex((todo) => todo.todoName === item.todoName);
+      if (index !== -1) {
+        uniqueTodoList[index] = item;
+      } else {
+        uniqueTodoList.push(item);
+      }
+    });
+  todoList=uniqueTodoList
+    return res.send({
+      success: true,
+      message: "Duplicate items removed",
+      data: todoList,
+    });
+  });
+  //phân trang
+  // Đường dẫn: /TodoList?page=<page>&pageSize=<pageSize>
+app.get("/TodoList", (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+  
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = page * pageSize;
+  
+    const paginatedData = todoList.slice(startIndex, endIndex);
+  
+    return res.send({
+      success: true,
+      message: "Chiapage thành công",
+      currentPage: page,
+      pageSize: pageSize,
+      totalItems: todoList.length,
+      totalPages: Math.ceil(todoList.length / pageSize),
+      data: paginatedData,
+    });
+  });
+ 
+
+
 
 /*-------------------------------------*/
 app.get("/todoList", (req, res) => {
