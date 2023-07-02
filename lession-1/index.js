@@ -1,7 +1,7 @@
 import express from "express";
 import crypto from "crypto";
 const app = express();
-const todoList = [];
+let todoList = [];
 // tạo ra 1 biến lưu trữ todoList const todoList=[]
 /*
 *viết end point trả ra dữ liệu của todoList
@@ -41,8 +41,107 @@ app.get("/TodoList/add", (req, res) => {
     });
   }
 });
-//bài1
+//bài1 : remove theo id
+app.get("/TodoList/remove", (req, res) => {
+  const { todoId } = req.query;
 
+  if (!todoId) {
+    res.send({
+      success: false,
+      message: "Remove fail: missing todoId",
+      data: todoList,
+    });
+  }
+
+  const updatedTodoList = todoList.filter((item) => item.id !== todoId);
+
+  if (updatedTodoList.length === todoList.length) {
+    res.send({
+      success: false,
+      message: "Remove fail: Không tìm thấy id",
+      data: todoList,
+    });
+  }
+
+  todoList = updatedTodoList;
+
+  return res.send({
+    success: true,
+    message: "Remove success",
+    data: todoList,
+  });
+});
+//Tìm kiếm todoName theo các ký tự truyền qua query param
+app.get("/TodoList/find", (req, res) => {
+  const { todoName } = req.query;
+  if (!todoName) {
+    res.send({
+      message: "Find fail:missing todoName",
+      data: todoList,
+      success: false,
+    });
+  } else {
+    const updatedTodoList = todoList.filter(
+      (item) => item.todoName == todoName
+    );
+    if (updatedTodoList.length == 0) {
+      res.send({
+        success: false,
+        message: "Không tìm thấy ",
+        data: updatedTodoList,
+      });
+    }
+
+    res.send({
+      success: true,
+      message: "Tìm kiếm thành công",
+      data: updatedTodoList,
+    });
+  }
+});
+
+//- Xoá mảng todoList (làm rỗng array)
+app.get("/TodoList/removeAll", (req, res) => {
+  todoList = [];
+  res.send({
+    message: "xóa tất cả todolist thành công",
+    data: todoList,
+    success: true,
+  });
+});
+//update
+app.get("/TodoList/update", (req, res) => {
+  const { todoId, todoName } = req.query;
+  if (!todoId || !todoName) {
+    return res.send({
+      success: false,
+      message: "Update fail: Missing todoId or updatedTodo",
+      data: todoList,
+    });
+  }
+  const todoIndex = todoList.findIndex((item) => item.id === todoId);
+  if (todoIndex === -1) {
+    return res.send({
+      success: false,
+      message: "Update fail: không tìm thấy Id",
+      data: todoList,
+    });
+  }
+  const updatedTodoList = {
+    id: todoId,
+    todoName: todoName,
+    createdAt: new Date().getTime(),
+  };
+  todoList[todoIndex] = updatedTodoList;
+
+  return res.send({
+    success: true,
+    message: "Update thành công",
+    data: todoList,
+  });
+});
+
+/*-------------------------------------*/
 app.get("/todoList", (req, res) => {
   res.send({
     message: "thanh cong",
