@@ -82,7 +82,7 @@ app.get("/TodoList/find", (req, res) => {
     });
   } else {
     const updatedTodoList = todoList.filter(
-      (item) => item.todoName == todoName
+      (item) => item.todoName.includes(todoName)
     );
     if (updatedTodoList.length == 0) {
       res.send({
@@ -113,7 +113,7 @@ app.get("/TodoList/removeAll", (req, res) => {
 app.get("/TodoList/update", (req, res) => {
   const { todoId, todoName } = req.query;
   if (!todoId || !todoName) {
-    return res.send({
+     res.send({
       success: false,
       message: "Update fail: Missing todoId or updatedTodo",
       data: todoList,
@@ -121,7 +121,7 @@ app.get("/TodoList/update", (req, res) => {
   }
   const todoIndex = todoList.findIndex((item) => item.id === todoId);
   if (todoIndex === -1) {
-    return res.send({
+    res.send({
       success: false,
       message: "Update fail: không tìm thấy Id",
       data: todoList,
@@ -134,7 +134,7 @@ app.get("/TodoList/update", (req, res) => {
   };
   todoList[todoIndex] = updatedTodoList;
 
-  return res.send({
+  res.send({
     success: true,
     message: "Update thành công",
     data: todoList,
@@ -142,47 +142,51 @@ app.get("/TodoList/update", (req, res) => {
 });
 ///xóa trùng
 app.get("/TodoList/removeduplicate", (req, res) => {
-    const uniqueTodoList = [];
-  
-    todoList.forEach((item) => {
-      const index = uniqueTodoList.findIndex((todo) => todo.todoName === item.todoName);
-      if (index !== -1) {
-        uniqueTodoList[index] = item;
-      } else {
-        uniqueTodoList.push(item);
-      }
-    });
-  todoList=uniqueTodoList
-    return res.send({
-      success: true,
-      message: "Duplicate items removed",
-      data: todoList,
-    });
-  });
-  //phân trang
-  // Đường dẫn: /TodoList?page=<page>&pageSize=<pageSize>
-app.get("/TodoList", (req, res) => {
-    const page = parseInt(req.query.page) || 1;
-    const pageSize = parseInt(req.query.pageSize) || 10;
-  
-    const startIndex = (page - 1) * pageSize;
-    const endIndex = page * pageSize;
-  
-    const paginatedData = todoList.slice(startIndex, endIndex);
-  
-    return res.send({
-      success: true,
-      message: "Chiapage thành công",
-      currentPage: page,
-      pageSize: pageSize,
-      totalItems: todoList.length,
-      totalPages: Math.ceil(todoList.length / pageSize),
-      data: paginatedData,
-    });
-  });
- 
+  const uniqueTodoList = [];
 
+  todoList.forEach((item) => {
+    const index = uniqueTodoList.findIndex(
+      (todo) => todo.todoName === item.todoName
+    );
+    if (index !== -1) {
+      uniqueTodoList[index] = item;
+    } else {
+      uniqueTodoList.push(item);
+    }
+  });
+  todoList = uniqueTodoList;
+  res.send({
+    success: true,
+    message: "Duplicate items removed",
+    data: todoList,
+  });
+});
+//phân trang
+app.get("/TodoList/paginate", (req, res) => {
+  let{page,pageSize} =req.query;
+  if(!page||!pageSize){
+      page=1;
+      pageSize=10;
+    
+  }
+  page=parseInt(page);
+  pageSize=parseInt(pageSize);
 
+  const startIndex = (page - 1) * pageSize;
+  const endIndex = page * pageSize;
+
+  const paginatedData = todoList.slice(startIndex, endIndex);
+
+  res.send({
+    success: true,
+    message: "Chiapage thành công",
+    currentPage: page,
+    pageSize: pageSize,
+    totalItems: todoList.length,
+    totalPages: Math.ceil(todoList.length / pageSize),
+    data: paginatedData,
+  });
+});
 
 /*-------------------------------------*/
 app.get("/todoList", (req, res) => {
