@@ -101,7 +101,7 @@ const todolistController= {
           let{page,pageSize} =req.query;
           if(!page||!pageSize){
               page=1;
-              pageSize=10;
+              pageSize=5;
             
           }
           page=parseInt(page);
